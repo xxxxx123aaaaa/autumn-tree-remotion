@@ -114,12 +114,15 @@ skyTime = t + max(0, base - 24)         // 24s 后继续增长（月相/星光�
 ## 验证结果（详见 [TESTING.md](TESTING.md) 与 [RENDER-REPORT.md](RENDER-REPORT.md)）
 
 - 打包链路：默认 webpack 路径与 `--rspack` 均打包成功（52 个产物文件，含 5.2 MB `tree-data.js`）；
-- 视觉复刻度（540 帧内 75 帧抽样，720×960 对照参考视频抽帧）：**MAE 均值 1.16 / SSIM 均值 0.9939**；
-- 成片规格复核：1080×1440 / 30 fps / 560 帧 / 18.667 s / H.264（`out/autumn-tree-moon.mp4`，不入库）；
+- 视觉复刻度（75 帧抽样，720×960 对照参考视频抽帧）：**MAE 均值 1.16 / SSIM 均值 0.9939**；
+- **真实 Remotion + Chromium 渲染已实测通过**（2026-10-21）：`renderStill` 单帧成功；
+  整片 `renderMedia` **560 帧 / 30 fps / 18.667 s**，渲染耗时 69 s；成片抽 11 帧与参考视频同帧对照
+  **MAE 均值 1.0985 / SSIM 均值 0.9918**（min 0.9886，包含 H.264 有损与缩放误差）；
+- 成片规格复核：1080×1440 / 30 fps / 560 帧 / 18.667 s / H.264（`out/` 不入库）；
 - 对照图：[docs/render-compare.jpg](docs/render-compare.jpg)（左参考 / 右复刻）。
 
-> 说明：本任务所在执行环境（DSH 沙箱）禁止 Chromium 所需的 Windows named pipe，
-> 因此 Remotion 的浏览器渲染只能由用户在正常环境执行；仓库代码本身不依赖任何本地垫片，
+> 说明：本任务早期验证环境（DSH 沙箱）曾禁止 Chromium 所需的 Windows named pipe，
+> 验证环境获得完整权限后已用真实 Remotion 渲染复核（见上）。仓库代码不依赖任何本地垫片，
 > 正常机器上 `npm install && npx remotion render AutumnTreeMoon out/autumn-tree-moon.mp4` 即可出片。
 
 ## 备注

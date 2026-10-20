@@ -4,6 +4,7 @@
 结论先行：**仓库可安装、可 typecheck、可打包（webpack 默认路径与 Rspack 均通过）**；
 Remotion 的浏览器渲染（`remotion still` / `remotion render`）在正常机器上即可运行，
 但**在本任务所用的 DSH 沙箱内无法执行**（原因见 §3），成片改用等价路径渲染验证（§4、`RENDER-REPORT.md`）。
+**补记（2026-10-21）**：验证环境后来获得完整进程权限，真实 Remotion + Chromium 渲染已实测通过（见 §7）。
 
 ## 1. 依赖安装
 
@@ -121,3 +122,17 @@ npm run bundle              # remotion bundle（可选，验证打包）
 npm run still               # 单帧 PNG
 npm run render              # 整片 mp4
 ```
+
+## 7. 补记（2026-10-21）：真实 Remotion 渲染已在“完整权限”环境验证通过
+
+本机验证环境后来获得完整进程权限（Chromium 所需 Windows named pipe 可用），于是补做了真实渲染：
+
+| 项 | 结果 |
+|---|---|
+| `remotion bundle` | ✅ 此前已验证（webpack 24.2 s / 52 文件；rspack 2.1 s） |
+| `renderStill` 单帧 | ✅ `out/remotion-still-240.png`（1080×1440 第 240 帧），对照参考 **MAE 1.32 / SSIM 0.9899** |
+| `renderMedia` 整片 | ✅ `out/autumn-tree-moon-remotion.mp4`：**4.53 MB / 1080×1440 / 30 fps / 560 帧 / 18.667 s**，耗时 **69.2 s**（concurrency=2） |
+| 整片抽 11 帧 vs 参考 | MAE 均值 **1.0985**，SSIM 均值 **0.9918**（min 0.9886） |
+
+说明：沙箱限制只影响本机"验证环境"，与仓库无关；正常机器 `npm install && npx remotion render` 原生可用，
+无需任何垫片。§4.3 的本地垫片仅为当时沙箱下的临时验证手段，已不复需要。

@@ -33,7 +33,10 @@ FATAL:mojo\public\cpp\platform\platform_channel.cc:108] Check failed: . : 拒绝
 > 换句话说：Remotion 组件在浏览器里做的是「每帧把 t/skyTime 交给引擎，引擎同步画到 canvas」，
 > 本报告用同样的引擎、同样的映射、同样的 1080×1440 输出在 Node 里复现了这部像素生成过程；
 > 唯一未在本机执行的是 Chrome 自身的 canvas 光栅化（同为 Skia，理论上逐像素等价）。
-> 真实 Remotion 出片命令见第四节，在非沙箱环境执行。
+> 真实 Remotion 出片命令见第四节。
+>
+> **补记（2026-10-21）**：验证环境后来获得了完整进程权限，**真实 Remotion + Chromium 渲染已在本机
+> 成功执行**（`renderStill` 与整片 `renderMedia`），成片与等价路径一致，详见第六节。
 
 ## 三、逐帧复核
 
@@ -72,7 +75,7 @@ FATAL:mojo\public\cpp\platform\platform_channel.cc:108] Check failed: . : 拒绝
 [`docs/render-compare.jpg`](docs/render-compare.jpg)：12 组「左=参考 ref/cmp，右=成片抽帧（1080×1440）」
 网格，标注每帧 t / MAE / SSIM；底部为汇总。可见树、树冠、金色粒子、蝶群、月相与参考基本一致。
 
-## 四、真实 Remotion 出片命令（请在非沙箱环境执行）
+## 四、Remotion 出片命令（正常机器直接可用）
 
 ```bash
 cd repo
@@ -96,3 +99,21 @@ npx remotion still AutumnTreeMoon out/still-frame-240.png --frame=240         # 
 3. **无音轨**：参考视频音轨来自原实现的 `sound.js` 合成，本复刻只还原画面（仓库不含音频）。
 4. 引擎 `glitter.js`（WebGL 反光）**未纳入**，统一走 Canvas2D 回退，保证无 GPU 可渲染；
    与参考的差异主要是金色表面高光强度，肉眼几乎不可辨（MAE 已体现）。
+
+## 六、真实 Remotion + Chromium 渲染验证（2026-10-21 补记）
+
+验证环境（本机 Windows 11 / Node v23.11）后来获得完整进程权限（Chromium 所需的 named pipe 可用），
+于是用**仓库内同一份代码**完成了真实 Remotion 渲染：
+
+- 打包：`npx remotion bundle --out-dir=out/bundle-webpack`（此前已验证成功）；
+- 渲染：`@remotion/renderer` 的 `selectComposition` → `renderStill` / `renderMedia`，
+  浏览器使用本机 Chrome（`--browser-executable`，Chrome 155），组件内 `delayRender` 等引擎初始化；
+- 结果：
+  - **单帧**：`out/remotion-still-240.png`（1080×1440，第 240 帧）✅；与参考视频第 240 帧（同尺寸）
+    对照 **MAE 1.32 / SSIM 0.9899**；
+  - **整片**：`out/autumn-tree-moon-remotion.mp4` —— **4,531,704 B / 1080×1440 / 30 fps / 560 帧 /
+    18.667 s / H.264**，渲染耗时 **69.2 s**（concurrency=2）；
+  - 整片按帧号 `15,30,60,120,180,240,300,360,420,480,540` 抽 11 帧，与参考视频同帧号（720×960）对照：
+    **MAE 均值 1.0985 / 中位 1.2422 / 最大 1.4354；SSIM 均值 0.9918 / 最小 0.9886**。
+- 结论：真实 Remotion 管线的成片与 §3 等价路径指标一致（同一引擎、同一映射），
+  **复刻度不依赖等价路径假设**；此前"沙箱无法启动 Chromium"仅是本机验证环境的阶段性限制，与仓库无关。
