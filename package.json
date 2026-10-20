@@ -1,0 +1,25 @@
+{
+  "name": "autumn-tree-moon",
+  "version": "1.0.0",
+  "private": true,
+  "description": "《树上的秋天化作了月光》Remotion 复刻（Motion Face 片段 2ce87c62-2623-4af7-9cd4-6473e2a231c2）",
+  "license": "MIT",
+  "scripts": {
+    "dev": "remotion studio",
+    "bundle": "remotion bundle --out-dir=out/bundle",
+    "render": "remotion render AutumnTreeMoon out/autumn-tree-moon.mp4",
+    "still": "remotion still AutumnTreeMoon out/still-frame-30.png --frame=30",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.537",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.537"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "5.9.3"
+  }
+}

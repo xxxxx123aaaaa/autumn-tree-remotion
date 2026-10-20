@@ -1,0 +1,25 @@
+# 依赖
+node_modules/
+
+# 渲染产物：视频、图片序列、抽帧一律不入库
+out/
+/out
+*.mp4
+*.webm
+*.mov
+*.mkv
+
+# 本地配置 / 凭证
+.env
+.env.*
+*.local
+
+# 日志与系统文件
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Remotion 缓存
+.remotion/
